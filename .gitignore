@@ -1,0 +1,34 @@
+# Local .terraform directories
+.terraform/
+.terraform.lock.hcl
+
+# Terraform state files
+terraform.tfstate
+terraform.tfstate.*
+crash.log
+# terraform
+.terraform/
+*.tfstate
+*.tfstate.*
+.terraform.lock.hcl
+crash.log
+
+# Sensitive variable files
+*.tfvars
+*.tfvars.json
+
+# Ignore override files (local dev overrides)
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Ignore plan output
+*.tfplan
+
+# Ignore any backup files
+*.bak
+*.backup
+
+# VS Code settings (optional, if editing infra separately)
+.vscode/
