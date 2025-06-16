@@ -4,7 +4,9 @@
   "description": "Minimal dependencies for Lambda layer",
   "type": "commonjs",
   "dependencies": {
-    "@azure/msal-node": "^1.14.0",
-    "node-fetch": "^2.6.7"
-  }
+  "@azure/msal-node": "^1.14.0",
+  "node-fetch": "^2.6.7",
+  "aws-sdk": "^2.1692.0"
+}
+
 }

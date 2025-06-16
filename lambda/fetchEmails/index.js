@@ -1,5 +1,4 @@
 // index.js
-require("dotenv").config();
 const AWS = require("aws-sdk");
 const fetch = require("node-fetch");
 const { ConfidentialClientApplication } = require("@azure/msal-node");
@@ -23,35 +22,42 @@ async function getAccessToken() {
   };
 
   const result = await msalClient.acquireTokenByClientCredential(tokenRequest);
+  console.log("🔑 Access token acquired");
   return result.accessToken;
 }
 
 async function fetchEmails(token) {
-  const res = await fetch("https://graph.microsoft.com/v1.0/me/messages?$top=5", {
+  const userId = process.env.MSFT_USER_ID; // NEW: Explicit user ID
+  const res = await fetch(`https://graph.microsoft.com/v1.0/users/${userId}/messages?$top=5`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
 
   const data = await res.json();
+  console.log("📨 Raw email fetch result:", JSON.stringify(data, null, 2));
   return data.value || [];
 }
 
 async function fetchAttachments(token, messageId) {
-  const res = await fetch(`https://graph.microsoft.com/v1.0/me/messages/${messageId}/attachments`, {
+  const userId = process.env.MSFT_USER_ID;
+  const res = await fetch(`https://graph.microsoft.com/v1.0/users/${userId}/messages/${messageId}/attachments`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
   });
 
   const data = await res.json();
+  console.log(`📎 Attachments for message ${messageId}:`, JSON.stringify(data, null, 2));
   return data.value || [];
 }
 
 async function uploadToS3AndSaveMetadata(attachment, message) {
   const decoded = Buffer.from(attachment.contentBytes, "base64");
-
   const s3Key = `attachments/${message.id}/${attachment.name}`;
+
+  console.log(`📤 Uploading to S3: ${s3Key}`);
+
   await s3
     .putObject({
       Bucket: process.env.S3_BUCKET,
@@ -60,6 +66,8 @@ async function uploadToS3AndSaveMetadata(attachment, message) {
       ContentType: attachment.contentType,
     })
     .promise();
+
+  console.log(`💾 Writing to DynamoDB for attachment: ${attachment.name}`);
 
   await dynamo
     .put({
@@ -82,8 +90,10 @@ exports.handler = async (event) => {
   try {
     const accessToken = await getAccessToken();
     const messages = await fetchEmails(accessToken);
+    console.log("📥 Messages fetched:", JSON.stringify(messages, null, 2));
 
     for (const message of messages) {
+      console.log(`📩 Subject: ${message.subject} | hasAttachments: ${message.hasAttachments}`);
       if (message.hasAttachments) {
         const attachments = await fetchAttachments(accessToken, message.id);
         for (const attachment of attachments) {

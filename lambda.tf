@@ -61,20 +61,25 @@ resource "aws_lambda_function" "fetch_emails" {
   role          = aws_iam_role.lambda_exec_role.arn
   handler       = "index.handler"
   runtime       = "nodejs18.x"
-
+  timeout       = 30 # ⬅️ increase to 30 seconds (or higher if needed)
   s3_bucket = "email-tracker-uploads"
   s3_key    = "lambda/fetchEmails/fetchEmails.zip"
+
+  layers = [aws_lambda_layer_version.fetch_emails_layer.arn]
 
   environment {
     variables = {
       AZURE_CLIENT_ID     = var.azure_client_id
       AZURE_CLIENT_SECRET = var.azure_client_secret
       AZURE_TENANT_ID     = var.azure_tenant_id
+      MSFT_USER_ID        = "nicholasd.bryant@outlook.com"         # 👈 Your Microsoft 365 inbox
+      S3_BUCKET           = "email-tracker-uploads"             # 👈 S3 bucket name
+      DYNAMODB_TABLE      = "email-tracker-capsules"            # 👈 DynamoDB table name
     }
   }
-  layers = [aws_lambda_layer_version.fetch_emails_layer.arn]
-
 }
+
+
 resource "aws_lambda_layer_version" "fetch_emails_layer" {
   layer_name          = "fetchEmailsDependencies"
   compatible_runtimes = ["nodejs18.x"]
