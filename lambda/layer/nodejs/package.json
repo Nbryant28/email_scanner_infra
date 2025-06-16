@@ -1,0 +1,10 @@
+{
+  "name": "lambda-layer",
+  "version": "1.0.0",
+  "description": "Minimal dependencies for Lambda layer",
+  "type": "commonjs",
+  "dependencies": {
+    "@azure/msal-node": "^1.14.0",
+    "node-fetch": "^2.6.7"
+  }
+}

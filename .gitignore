@@ -26,6 +26,11 @@ override.tf.json
 # Ignore plan output
 *.tfplan
 
+.env
+*.zip
+terraform.tfvars
+
+
 # Ignore any backup files
 *.bak
 *.backup

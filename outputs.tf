@@ -5,3 +5,5 @@ output "dynamodb_table_name" {
 output "s3_bucket_name" {
   value = aws_s3_bucket.email_tracker_uploads.id
 }
+
+
