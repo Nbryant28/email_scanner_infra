@@ -69,12 +69,13 @@ resource "aws_lambda_function" "fetch_emails" {
 
   environment {
     variables = {
-      AZURE_CLIENT_ID     = var.azure_client_id
-      AZURE_CLIENT_SECRET = var.azure_client_secret
-      AZURE_TENANT_ID     = var.azure_tenant_id
-      MSFT_USER_ID        = "nicholasd.bryant@outlook.com"         # 👈 Your Microsoft 365 inbox
-      S3_BUCKET           = "email-tracker-uploads"             # 👈 S3 bucket name
-      DYNAMODB_TABLE      = "email-tracker-capsules"            # 👈 DynamoDB table name
+    #   AZURE_CLIENT_ID     = var.azure_client_id
+    #   AZURE_CLIENT_SECRET = var.azure_client_secret
+    #   AZURE_TENANT_ID     = var.azure_tenant_id
+    #   MSFT_USER_ID        = "nicholasd.bryant@outlook.com" 
+    NEXTAUTH_SECRET     = var.nextauth_secret         
+      S3_BUCKET           = "email-tracker-uploads"             
+      DYNAMODB_TABLE      = "email-tracker-capsules"            
     }
   }
 }
@@ -88,5 +89,9 @@ resource "aws_lambda_layer_version" "fetch_emails_layer" {
   s3_key    = "lambda/layer/layer.zip"
 
   source_code_hash = filebase64sha256("${path.module}/lambda/layer/layer.zip")
+}
+resource "aws_lambda_function_url" "fetch_emails_url" {
+  function_name = aws_lambda_function.fetch_emails.function_name
+  authorization_type = "NONE" # ⚠️ Make sure this is "NONE" for public access
 }
 
